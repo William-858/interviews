@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>面試文件產生器</title>
+<style>
+  :root {
+    --bg: #f4f7f8; --card: #ffffff; --ink: #1a2a33; --muted: #5a6b75; --line: #d5e0e5;
+    --accent: #1f5c7a; --accent-ink: #ffffff; --accent-soft: #e8f1f5; --danger: #b3261e; --ok: #1e7a4c;
+    --radius: 12px; --shadow: 0 1px 2px rgba(16,40,52,.06), 0 4px 16px rgba(16,40,52,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f171b; --card:#172228; --ink:#e3ecef; --muted:#9db0b8; --line:#2a3a42;
+      --accent:#5fa9cc; --accent-ink:#0f171b; --accent-soft:#1d313b; --danger:#f2867e; --ok:#6fcf9b;
+      --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif; line-height: 1.6; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 120px; }
+  header h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: .02em; }
+  header p { margin: 0 0 28px; color: var(--muted); font-size: 14px; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 22px 22px 18px; margin-bottom: 18px; }
+  .step-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+  .step-head h2 { margin: 0; font-size: 18px; }
+  .step-head .hint { margin-left: auto; color: var(--muted); font-size: 13px; }
+  label.f { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=date] { width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .people { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: grid; grid-template-columns: 128px 1fr 40px; gap: 10px; align-items: center; }
+  .row .tag { font-size: 13px; color: var(--muted); }
+  .row .tag.lead { color: var(--accent); font-weight: 700; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--line); background: var(--card);
+    color: var(--muted); font-size: 20px; cursor: pointer; display: grid; place-items: center; }
+  .icon-btn:hover { color: var(--danger); border-color: var(--danger); }
+  .icon-btn[disabled] { visibility: hidden; }
+  .add { margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; border: 1px dashed var(--accent);
+    color: var(--accent); background: transparent; border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+  .add .plus { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-size: 17px; line-height: 1; }
+  .add:hover { background: var(--accent-soft); }
+  .tools { display: flex; gap: 8px; margin-bottom: 12px; }
+  .link-btn { background: none; border: none; color: var(--accent); font: inherit; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+  .projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .proj { position: relative; border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px 12px 42px;
+    cursor: pointer; background: var(--card); transition: border-color .15s, background .15s; }
+  .proj:hover { border-color: var(--accent); }
+  .proj input { position: absolute; left: 14px; top: 15px; width: 17px; height: 17px; accent-color: var(--accent); }
+  .proj .code { font-size: 12px; color: var(--muted); }
+  .proj .name { font-weight: 700; font-size: 14.5px; line-height: 1.45; margin: 2px 0 6px; }
+  .proj .meta { font-size: 12px; color: var(--muted); }
+  .proj.on { border-color: var(--accent); background: var(--accent-soft); }
+  .bar { position: sticky; bottom: 0; margin-top: 8px; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: 0 -2px 20px rgba(16,40,52,.08); padding: 14px 18px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .bar .sum { flex: 1; min-width: 220px; font-size: 14px; }
+  .bar .sum b { color: var(--accent); }
+  .primary { background: var(--accent); color: var(--accent-ink); border: none; border-radius: 10px; padding: 12px 22px;
+    font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .primary[disabled] { opacity: .45; cursor: not-allowed; }
+  .msg { width: 100%; font-size: 13px; }
+  .msg.err { color: var(--danger); } .msg.ok { color: var(--ok); }
+  .req { color: var(--danger); }
+  @media (max-width: 600px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr 40px; }
+    .row .tag { grid-column: 1 / -1; margin-bottom: -6px; }
+    .step-head .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>面試文件產生器</h1>
+    <p>財團法人台灣水資源與農業研究院｜填寫面試官、勾選計畫、填寫面試者後，一次下載所有 Word 文件（ZIP）。</p>
+  </header>
+
+  <section class="step">
+    <div class="step-head"><span class="num">1</span><h2>面試官</h2><span class="hint">每位面試官 × 每個計畫各產生一份準備資料</span></div>
+    <div class="people" id="ivList"></div>
+    <button class="add" id="ivAdd" type="button"><span class="plus">+</span>新增面試官</button>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="num">2</span><h2>選擇計畫</h2><span class="hint" id="projCount">可複選</span></div>
+    <div class="tools">
+      <button class="link-btn" type="button" id="selAll">全選</button>
+      <button class="link-btn" type="button" id="selNone">清除</button>
+    </div>
+    <div class="projects" id="projList"></div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="num">3</span><h2>面試者</h2><span class="hint">每位面試者 × 每個計畫各產生一份工作說明</span></div>
+    <div class="people" id="cdList"></div>
+    <button class="add" id="cdAdd" type="button"><span class="plus">+</span>新增面試者</button>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="num">4</span><h2>面試資訊（選填）</h2><span class="hint">留白就不會印在文件上</span></div>
+    <div class="grid2">
+      <div><label class="f" for="date">面試日期</label><input type="date" id="date"></div>
+      <div><label class="f" for="position">應徵職稱</label><input type="text" id="position" placeholder="例：研究助理"></div>
+    </div>
+  </section>
+
+  <div class="bar">
+    <div class="sum" id="sum"></div>
+    <button class="primary" id="go" type="button">產生並下載 ZIP</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<script src="lib/docx.iife.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/docgen.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const P = window.PROJECTS || [];
+  let getIv = null, getCd = null;
+
+  /* ---------- 人員清單 ---------- */
+  function makeList(listEl, addBtn, kind) {
+    const isIv = kind === 'iv';
+    function renumber() {
+      [...listEl.children].forEach((row, i) => {
+        const tag = row.querySelector('.tag'), del = row.querySelector('.icon-btn'), inp = row.querySelector('input');
+        if (isIv) {
+          tag.textContent = i === 0 ? '主面試官（主管）' : `面試官 ${i + 1}`;
+          tag.classList.toggle('lead', i === 0);
+          inp.placeholder = i === 0 ? '請輸入主管姓名（必填）' : '面試官姓名';
+          del.disabled = i === 0;
+        } else {
+          tag.textContent = `面試者 ${i + 1}`;
+          del.disabled = listEl.children.length === 1;
+        }
+        del.setAttribute('aria-label', `移除${tag.textContent}`);
+      });
+      update();
+    }
+    function add(focus) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = '<span class="tag"></span><input type="text" autocomplete="off"><button class="icon-btn" type="button" title="移除">×</button>';
+      row.querySelector('input').addEventListener('input', update);
+      row.querySelector('input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(true); } });
+      row.querySelector('.icon-btn').addEventListener('click', () => { row.remove(); renumber(); });
+      listEl.appendChild(row);
+      renumber();
+      if (focus) row.querySelector('input').focus();
+    }
+    addBtn.addEventListener('click', () => add(true));
+    add(false);
+    return () => [...listEl.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+  }
+
+  /* ---------- 計畫卡片 ---------- */
+  const projList = $('projList');
+  P.forEach(p => {
+    const el = document.createElement('label');
+    el.className = 'proj';
+    el.innerHTML = `<input type="checkbox" value="${p.id}"><div class="code">${p.code}｜${p.tag || ''}</div>
+      <div class="name"></div><div class="meta"></div>`;
+    el.querySelector('.name').textContent = p.title.replace(/[（(][^）)]*題名[^）)]*[）)]/g, '').replace(/^1\d\d(-1\d\d)?\s*年度?\s*/, '').replace(/[「」]/g, '').trim();
+    el.querySelector('.meta').textContent = `${p.client}｜${p.year} 年度`;
+    const cb = el.querySelector('input');
+    cb.addEventListener('change', () => { el.classList.toggle('on', cb.checked); update(); });
+    projList.appendChild(el);
+  });
+  const selected = () => [...projList.querySelectorAll('input:checked')].map(c => P.find(p => p.id === c.value));
+  function setAll(v) { projList.querySelectorAll('input').forEach(c => { c.checked = v; c.closest('.proj').classList.toggle('on', v); }); update(); }
+  $('selAll').onclick = () => setAll(true);
+  $('selNone').onclick = () => setAll(false);
+
+  getIv = makeList($('ivList'), $('ivAdd'), 'iv');
+  getCd = makeList($('cdList'), $('cdAdd'), 'cd');
+
+  /* ---------- 摘要 ---------- */
+  function update() {
+    if (!getIv || !getCd) return;
+    const iv = getIv(), cd = getCd(), ps = selected();
+    const lead = $('ivList').querySelector('input').value.trim();
+    $('projCount').textContent = ps.length ? `已選 ${ps.length} 個計畫` : '可複選';
+    const n1 = iv.length * ps.length, n2 = cd.length * ps.length;
+    $('sum').innerHTML = `面試官 <b>${iv.length}</b> 位 × 計畫 <b>${ps.length}</b> 個 ＝ 準備資料 <b>${n1}</b> 份；` +
+      `面試者 <b>${cd.length}</b> 位 × 計畫 <b>${ps.length}</b> 個 ＝ 工作說明 <b>${n2}</b> 份`;
+    $('go').disabled = !lead || !ps.length || (n1 + n2 === 0);
+    $('msg').className = 'msg';
+    $('msg').textContent = !lead ? '請先填寫主面試官（主管）姓名。' : (!ps.length ? '請至少勾選一個計畫。' : '');
+  }
+  window.setTimeout(update, 0);
+
+  /* ---------- 產生 ZIP ---------- */
+  function uniq(names) {
+    const seen = {};
+    return names.map(n => { seen[n] = (seen[n] || 0) + 1; return seen[n] > 1 ? `${n}(${seen[n]})` : n; });
+  }
+  $('go').addEventListener('click', async () => {
+    const btn = $('go'), msg = $('msg');
+    const ivNames = uniq(getIv()), cdNames = uniq(getCd()), ps = selected();
+    const date = $('date').value, position = $('position').value.trim();
+    const leadName = $('ivList').querySelector('input').value.trim();
+    btn.disabled = true;
+    try {
+      const zip = new JSZip();
+      const total = (ivNames.length + cdNames.length) * ps.length;
+      let done = 0;
+      const tick = () => { done++; msg.className = 'msg'; msg.textContent = `產生中… ${done} / ${total}`; };
+      for (const p of ps) {
+        for (let i = 0; i < ivNames.length; i++) {
+          const person = { name: ivNames[i], lead: i === 0 && ivNames[i] === leadName, position, date };
+          const blob = await DocGen.Packer.toBlob(DocGen.interviewerDoc(p, person, ivNames));
+          zip.file(`面試官資料/${DocGen.fileName('面試官', person, p)}`, blob); tick();
+        }
+        for (const name of cdNames) {
+          const person = { name, position, date };
+          const blob = await DocGen.Packer.toBlob(DocGen.candidateDoc(p, person));
+          zip.file(`面試者資料/${DocGen.fileName('面試者', person, p)}`, blob); tick();
+        }
+      }
+      const out = await zip.generateAsync({ type: 'blob' });
+      const stamp = date || new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(out);
+      a.download = `面試資料_${stamp}.zip`;
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 60000);
+      msg.className = 'msg ok';
+      msg.textContent = `完成！已下載 ${total} 份文件（面試官資料、面試者資料兩個資料夾）。`;
+    } catch (e) {
+      console.error(e);
+      msg.className = 'msg err';
+      msg.textContent = '產生失敗：' + (e && e.message ? e.message : e);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

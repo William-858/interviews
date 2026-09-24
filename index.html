@@ -91,6 +91,11 @@
   .banner[hidden] { display: none; }
   .note { font-size: 13px; color: var(--muted); margin-top: 10px; }
   #proofMsg { font-size: 13px; margin-top: 10px; white-space: pre-line; }
+  .pend { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 10px; background: var(--accent-soft); font-size: 14px; }
+  .pend[hidden] { display: none; }
+  .ghset { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .ghset summary { cursor: pointer; color: var(--accent); font-weight: 700; font-size: 14px; }
+  .ghset input[type=checkbox] { width: auto; accent-color: var(--accent); }
   @media (max-width: 600px) { .steps3 { grid-template-columns: 1fr; } header { flex-direction: column; } }
   @media (max-width: 600px) {
     .grid2 { grid-template-columns: 1fr; }
@@ -105,29 +110,29 @@
   <header>
     <div class="ttl">
     <h1>面試文件產生器</h1>
-    <p>財團法人台灣水資源與農業研究院｜填寫面試官、勾選計畫、填寫面試者後，一次下載所有 Word 文件（ZIP）。<span style="opacity:.6">　版本 v3</span></p>
+    <p>財團法人台灣水資源與農業研究院｜填寫面試官、勾選計畫、填寫面試者後，一次下載所有 Word 文件（ZIP）。<span style="opacity:.6">　版本 v5</span></p>
     </div>
     <button class="proof-btn" id="proofToggle" type="button" aria-expanded="false" aria-controls="proof" title="主管校對、調整文件內容">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-      內容校對<span class="dot" title="目前使用校對後的內容"></span>
+      內容校對<span class="dot" title="預覽中：尚未上傳到 GitHub"></span>
     </button>
   </header>
 
   <section class="step" id="proof" hidden>
-    <div class="step-head"><h2>內容校對（主管用）</h2><span class="hint">用 Excel 調整面試者版與面試官版的文字</span></div>
+    <div class="step-head"><h2>內容校對（主管用）</h2><span class="hint">主管改 Excel，管理者上傳更新</span></div>
     <div class="steps3">
-      <div><b>① 下載校對表</b>每個計畫一個分頁，只改「修改內容」那一欄。</div>
+      <div><b>① 主管下載校對表</b>每個計畫一個分頁，只改「修改內容」那一欄，改好交給管理者。</div>
       <div><b>② 在 Excel 修改</b>刪除＝清空該格；新增＝填「（新增）」列。</div>
-      <div><b>③ 上傳回來</b>立刻用新內容產生文件，並記在這台電腦的瀏覽器。</div>
+      <div><b>③ 管理者上傳</b>網頁自動下載 content.json，管理者再把它放上 GitHub，所有人同步更新。</div>
     </div>
+    <p class="note" id="srcInfo" style="margin:0 0 12px"></p>
     <div class="btns">
       <button class="ghost" id="proofDl" type="button">下載校對表（Excel）</button>
-      <button class="ghost" id="proofUp" type="button">上傳校對表</button>
+      <button class="ghost" id="proofUp" type="button">上傳校對表（管理者使用）</button>
       <input type="file" id="proofFile" accept=".xlsx" hidden>
     </div>
-    <div class="banner" id="proofBanner" hidden></div>
     <div id="proofMsg"></div>
-    <p class="note">上傳的修改只存在你這台電腦的瀏覽器，其他人看不到。要讓所有人都用新內容，請把改好的 Excel 交給網頁管理者更新網站。</p>
+    <p class="note">管理者上傳校對表後，網頁會自動下載 <b>content.json</b>。把它上傳到 GitHub repo（與 index.html 同一層）覆蓋舊檔，所有使用者就會同步更新；沒有上傳到 GitHub 之前，其他人看到的仍是舊內容。</p>
   </section>
 
   <section class="step">
@@ -28576,9 +28581,9 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
       ['2. 想刪掉某一項：把該列的 G 欄清空即可（多欄項目要整組清空）。'],
       ['3. 想新增一項：填寫標示「（新增）」的空白列。需要更多列時，可先存檔上傳，再重新下載，就會多出新的空白列。'],
       ['4. 「例子」「參考答案重點」這類欄位，一行寫一點（儲存格內換行：Alt + Enter）。'],
-      ['5. 改完存檔（.xlsx），回到網頁按「上傳校對表」，就會用新內容產生文件。'],
+      ['5. 改完存檔（.xlsx）後交給管理者；管理者在網頁按「上傳校對表（管理者使用）」，會自動下載 content.json。'],
       ['6. 請注意 H 欄的建議數量／字數；內容加太多，面試者版可能超過 2 頁、面試官版可能超過 4 頁。'],
-      ['7. 要讓所有人都用到新內容，請把改好的 Excel 交給網頁管理者更新網站。'],
+      ['7. 管理者把 content.json 上傳到 GitHub（與 index.html 同一層）後，所有人重新整理就會看到新內容。'],
       [''],
       ['計畫清單'],
       ...projects.map(p => [sheetName(p), p.title]),
@@ -28664,9 +28669,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 (function () {
   const $ = id => document.getElementById(id);
   const DEFAULT = window.PROJECTS || [];
-  const KEY = 'interview-proofing-v1';
-  let P = DEFAULT, custom = null;
-  try { const c = JSON.parse(localStorage.getItem(KEY) || 'null'); if (c && Array.isArray(c.projects) && c.projects.length) { custom = c; P = c.projects; } } catch (e) {}
+  let P = DEFAULT;
   let getIv = null, getCd = null;
 
   /* ---------- 人員清單 ---------- */
@@ -28729,38 +28732,46 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
   $('selAll').onclick = () => setAll(true);
   $('selNone').onclick = () => setAll(false);
 
-  /* ---------- 內容校對 ---------- */
-  const toggle = $('proofToggle'), panel = $('proof'), pmsg = $('proofMsg'), banner = $('proofBanner');
+  /* ---------- 內容校對（管理者上傳 → 產生 content.json） ---------- */
+  const toggle = $('proofToggle'), panel = $('proof'), pmsg = $('proofMsg');
+  const say = (t, color) => { pmsg.style.color = color || 'var(--muted)'; pmsg.textContent = t; };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   toggle.addEventListener('click', () => {
     const open = panel.hidden; panel.hidden = !open; toggle.setAttribute('aria-expanded', open);
     if (open) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  function showState() {
-    toggle.classList.toggle('custom', !!custom);
-    if (custom) {
-      banner.hidden = false;
-      banner.innerHTML = '';
-      const t = document.createElement('span');
-      t.textContent = `目前使用校對後的內容（${custom.time}上傳${custom.summary ? '，' + custom.summary : ''}）。產生的文件會套用這些修改。`;
-      const b = document.createElement('button');
-      b.className = 'ghost warn'; b.type = 'button'; b.textContent = '還原為預設內容';
-      b.style.cssText = 'margin-left:10px;padding:4px 10px;font-size:13px';
-      b.onclick = () => {
-        custom = null; P = DEFAULT;
-        try { localStorage.removeItem(KEY); } catch (e) {}
-        renderProjects(); showState(); update();
-        pmsg.style.color = 'var(--ok)'; pmsg.textContent = '已還原為預設內容。';
-      };
-      banner.append(t, b);
-    } else banner.hidden = true;
+  function setP(list) { P = list; renderProjects(); update(); }
+
+  /* 共用內容：與 index.html 同一層的 content.json；以內建清單為底，依 id 合併 */
+  let shared = null, preview = false;
+  function merge(list) {
+    const byId = Object.fromEntries((list || []).map(p => [p.id, p]));
+    const out = DEFAULT.map(p => byId[p.id] || p);
+    (list || []).forEach(p => { if (!DEFAULT.some(d => d.id === p.id)) out.push(p); });
+    return out;
   }
+  function showState() {
+    toggle.classList.toggle('custom', preview);
+    $('srcInfo').innerHTML = preview
+      ? '目前內容：<b>預覽中</b>（剛上傳的校對表，只在這個頁面有效；重新整理後回到網站上的版本）'
+      : shared ? `目前網站內容版本：<b>${esc(shared.updated_at || '')}</b>${shared.note ? '（' + esc(shared.note) + '）' : ''}`
+      : '目前網站內容版本：<b>網頁內建版</b>（網站上還沒有 content.json）';
+  }
+  async function loadShared() {
+    try {
+      const r = await fetch(`content.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      if (j && Array.isArray(j.projects)) { shared = j; if (!preview) setP(merge(j.projects)); showState(); }
+    } catch (e) { /* 沒有 content.json 就用內建內容 */ }
+  }
+
   $('proofDl').addEventListener('click', () => {
     try {
       const d = new Date(), pad = n => String(n).padStart(2, '0');
       Proofing.download(P, `面試文件內容校對表_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.xlsx`);
-      pmsg.style.color = 'var(--muted)';
-      pmsg.textContent = custom ? '已下載（內容是目前校對後的版本）。' : '已下載校對表。';
-    } catch (e) { pmsg.style.color = 'var(--danger)'; pmsg.textContent = '下載失敗：' + e.message; }
+      say('已下載校對表（內容為目前網站上的版本）。改好後請交給管理者上傳。');
+    } catch (e) { say('下載失敗：' + e.message, 'var(--danger)'); }
   });
   $('proofUp').addEventListener('click', () => $('proofFile').click());
   $('proofFile').addEventListener('change', async e => {
@@ -28769,29 +28780,28 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     try {
       const res = Proofing.applyWorkbook(new Uint8Array(await f.arrayBuffer()), P);
       const lines = [];
-      if (!res.changed.length) lines.push('上傳成功，但沒有偵測到任何修改。');
-      else {
-        lines.push(`上傳成功！共修改 ${res.changed.length} 個計畫：`);
-        res.changed.forEach(c => lines.push(`・${c.sheet}：${c.n} 個區塊有變動`));
-      }
+      if (!res.changed.length) lines.push('讀取成功，但沒有偵測到任何修改，所以沒有產生 content.json。');
+      else { lines.push(`讀取成功，共 ${res.changed.length} 個計畫有修改：`); res.changed.forEach(c => lines.push(`・${c.sheet}：${c.n} 個區塊`)); }
       res.warnings.forEach(w => lines.push('⚠ ' + w));
       if (res.changed.length) {
-        const now = new Date();
-        const total = (custom && custom.projects ? res.projects : res.projects).filter((p, i) => JSON.stringify(p) !== JSON.stringify(DEFAULT[i])).length;
-        custom = { time: now.toLocaleString('zh-TW', { hour12: false }), summary: `與預設相比共 ${total} 個計畫不同`, projects: res.projects };
-        P = res.projects;
-        try { localStorage.setItem(KEY, JSON.stringify(custom)); } catch (err) { lines.push('（這個瀏覽器無法記住修改，重新整理後需要再上傳一次。）'); }
-        renderProjects(); showState(); update();
+        const now = new Date().toLocaleString('zh-TW', { hour12: false });
+        const data = { version: 1, updated_at: now, note: `依校對表「${f.name}」更新`, projects: res.projects };
+        const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'content.json';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 60000);
+        preview = true; setP(res.projects); showState();
+        lines.push('', '已自動下載 content.json。請把它上傳到 GitHub repo（與 index.html 同一層），覆蓋舊的 content.json。',
+          '約 1–2 分鐘後，所有人重新整理網頁就會看到新內容。',
+          '※ 如果下載的檔名變成 content (1).json，上傳前請改回 content.json。',
+          '※ 這個頁面已先套用新內容供預覽，可以直接產生文件確認。');
       }
-      pmsg.style.color = res.changed.length ? 'var(--ok)' : 'var(--muted)';
-      pmsg.textContent = lines.join('\n');
-    } catch (err) {
-      console.error(err);
-      pmsg.style.color = 'var(--danger)';
-      pmsg.textContent = '讀取失敗：' + (err.message || err);
-    }
+      say(lines.join('\n'), res.changed.length ? 'var(--ok)' : 'var(--muted)');
+    } catch (err) { console.error(err); say('讀取失敗：' + (err.message || err), 'var(--danger)'); }
   });
   showState();
+  loadShared();
 
   getIv = makeList($('ivList'), $('ivAdd'), 'iv');
   getCd = makeList($('cdList'), $('cdAdd'), 'cd');
